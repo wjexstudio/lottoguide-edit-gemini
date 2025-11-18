@@ -1,0 +1,1 @@
+# lottoguide-edit-gemini
