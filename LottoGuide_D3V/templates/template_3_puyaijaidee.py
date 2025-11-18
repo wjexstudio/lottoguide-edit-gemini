@@ -1,0 +1,31 @@
+from .utils import resource_path
+
+TEMPLATE_NAME = "ผู้ใหญ่ใจดี"
+TEMPLATE_IMAGE = resource_path("assets/pic/ใบแนวทางโชคดี.jpg")
+TEMPLATE_ORDER = 3
+
+POSITIONS = [
+    (880, 400, 'TITLE'),
+    (900, 2150, 'CLOSING_TIME'),
+    (880, 200, 'DATE'),
+    (880, 600, 5),
+    (380, 1040, 1), (1370, 1040, 1),
+    (390, 1380, 2), (900, 1380, 2), (1370, 1380, 2),
+    (390, 1660, 2), (900, 1660, 2), (1370, 1660, 2),
+    (390, 1970, 3), (880, 1970, 3), (1370, 1970, 3)
+] 
+
+# ขนาดฟอนต์ที่ใช้ (TITLE, DATE, FIVE, ONE, TWO, THREE, CLOSING)
+FONT_SIZES = {
+    "TITLE": 100,
+    "CLOSING": 50,
+    "DATE": 80,
+    "FIVE": 140,
+    "ONE": 240,
+    "TWO": 140,
+    "THREE": 140
+}
+
+# ตัวแปรเสริม (ถ้ามีการใช้ขนาดภาพเฉพาะของ template นี้)
+OUTPUT_WIDTH = 1410
+OUTPUT_HEIGHT = 2000
