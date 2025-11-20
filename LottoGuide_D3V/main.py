@@ -718,19 +718,16 @@ class LottoGuideApp:
         try:
             selected_templates = [name for name, var in self.template_vars.items() if var.get()]
             count_per_template = int(self.count_var.get()) if self.count_var.get().isdigit() else 1
-
-            # 1. 🆕 วนลูปตามชื่อหวยทั้งหมด (CUSTOM_TITLES)
-            for i, (lotto_title, closing_time) in enumerate(zip(CUSTOM_TITLES, CLOSING_TIME)):
                 
                 # 2. 🆕 วนลูปตาม Template ที่ผู้ใช้เลือก (selected_templates)
-                for template_name in selected_templates:
-                    template_data = next((t for t in TEMPLATES if t["name"] == template_name), None)
+            for template_name in selected_templates:
+                template_data = next((t for t in TEMPLATES if t["name"] == template_name), None)
 
-                    if template_data is None:
-                        self._log_cb(f"⚠️ ข้ามการสร้างภาพ: ไม่พบข้อมูลเทมเพลต '{template_name}'")
+                if template_data is None:
+                    self._log_cb(f"⚠️ ข้ามการสร้างภาพ: ไม่พบข้อมูลเทมเพลต '{template_name}'")
                         # 💡 [แก้ไข] อัปเดต progress bar สำหรับงานที่ข้ามไป
-                        self._progress_cb(increment=count_per_template) 
-                        continue
+                    self._progress_cb(increment=count_per_template) 
+                    continue
                     
                     # 💡ตรรกะการเลือก Positions
                     default_positions = template_data.get("positions", []) # ใช้ .get ป้องกัน Key Error
