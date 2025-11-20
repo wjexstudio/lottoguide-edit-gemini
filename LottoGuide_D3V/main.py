@@ -18,7 +18,6 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk # 💡 [แก้ไข] ลบ ttk ออก
 from PIL import Image, ImageDraw, ImageFont, ImageTk
 from templates import TEMPLATES
-# 💡 [แก้ไข] ลบบรรทัด 'from templates import resource_path' ที่ซ้ำซ้อนออก
 from templates.utils import resource_path # Import 'resource_path' จาก 'templates.utils'
 
 # -----------------------
@@ -44,38 +43,7 @@ OUTPUT_HEIGHT = 2000
 # 🔢 รายการหวยทั้งหมด
 # -----------------------
 
-# ย้าย def load_raw_list มาไว้ข้างบนก่อนเรียกใช้
-def load_raw_list(file_path):
-    """โหลดรายการหวยจากไฟล์"""
-    try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            return [line.strip() for line in f if line.strip()]
-    except FileNotFoundError:
-        print(f"⚠️ ไม่พบไฟล์รายการหวยที่: {file_path}")
-        return [
-            "ลาวพัฒนาชุดเต็ม ปิดรับ 20.20น.",
-            "ลาวพัฒนาเม็ดเดียว ปิดรับ 20.20น.",
-            "หุ้นอียิปปปปปปป ปิดรับ 10.20น."
-        ]
-
-# เรียกใช้ load_raw_list *หลังจาก* ที่ def แล้ว
-RAW_LIST = load_raw_list(resource_path("assets/lotto_list.txt"))
-    
-# สร้างรายการชื่อและเวลาปิดรับ (ข้ามรายการที่ไม่มีเวลา)
-CUSTOM_TITLES = []
-CLOSING_TIME = []
-for item in RAW_LIST:
-    if "ปิดรับ" in item:
-        # แยกชื่อก่อนคำว่า "ปิดรับ"
-        parts = item.split(" ปิดรับ")
-        CUSTOM_TITLES.append(parts[0])
-        CLOSING_TIME.append("ปิดรับ" + parts[1])
-    else:
-        # ถ้าไม่มีคำว่า "ปิดรับ" → เก็บชื่อไว้ แต่เวลาว่าง
-        CUSTOM_TITLES.append(item)
-        CLOSING_TIME.append("")
-
-OUTPUT_COUNT = len(CUSTOM_TITLES)  # จำนวนชื่อหวยทั้งหมด
+OUTPUT_COUNT = 0  # จำนวนชื่อหวยทั้งหมด
 
 # -----------------------
 # ตั้งค่าขนาดฟอนต์ต่าง ๆ FONT SETTINGS
@@ -132,8 +100,7 @@ def load_custom_positions(template_name):
                 positions = json.load(f)
                 print(f"💡 โหลดตำแหน่งที่กำหนดเองสำหรับ '{template_name}' จาก {config_file}")
                 
-                # 💡 [แก้ไข] ตรวจสอบ Format ของ .json ที่อ่านได้
-                # ต้องเป็น List (ชั้นนอก) และข้างในเป็น List ทั้งหมด (ชั้นใน)
+                # ตรวจสอบ Format ของ .json ที่อ่านได้ ต้องเป็น List (ชั้นนอก) และข้างในเป็น List ทั้งหมด (ชั้นใน)
                 if isinstance(positions, list) and all(isinstance(item, list) for item in positions):
                     return positions
                 else:
@@ -161,8 +128,8 @@ def save_custom_positions(template_name, positions_list):
     
     try:
         with open(config_file, 'w', encoding='utf-8') as f:
-            # 💡 [แก้ไข] แปลง tuple (x, y, 'TYPE') เป็น list [x, y, 'TYPE'] ก่อนบันทึก
-            # เพื่อให้เป็น Format JSON ที่ถูกต้อง
+
+            # แปลง tuple (x, y, 'TYPE') เป็น list [x, y, 'TYPE'] ก่อนบันทึก เพื่อให้เป็น Format JSON ที่ถูกต้อง
             list_to_save = [[item[0], item[1], item[2]] for item in positions_list]
             json.dump(list_to_save, f, indent=4)
             print(f"💾 บันทึกตำแหน่งที่กำหนดเองสำหรับ '{template_name}' ไปที่ {config_file}")
@@ -245,16 +212,16 @@ def generate_single_lotto_images(image_path, font_path, output_dir, date_to_use,
                         lotto_title="",            # รับชื่อหวย
                         closing_time="",           # รับเวลาปิดรับ
                         positions=None, 
-                        template_data=None, # 💡 [แก้ไข] เปลี่ยนชื่อ parameter 'font_sizes' เป็น 'template_data'
+                        template_data=None, # เปลี่ยนชื่อ parameter 'font_sizes' เป็น 'template_data'
                         log_callback=None, 
-                        progress_callback=None, # 💡 [เพิ่ม] progress_callback
+                        progress_callback=None, # progress_callback
                         preview_callback=None):
     
     """
     ✅ ฟังก์ชันหลักสำหรับสร้างชุดภาพ (count_per_template) สำหรับ *1 ชื่อหวย* และ *1 Template*
     """
     
-    # 💡 [แก้ไข] ดึง dict ของ font_sizes ออกมาจาก template_data
+    # ดึง dict ของ font_sizes ออกมาจาก template_data
     if template_data is None:
         template_data = {} # ป้องกัน Error
     font_sizes = template_data.get("font_sizes", {}) # ดึง dict 'font_sizes' ออกมา
@@ -274,7 +241,7 @@ def generate_single_lotto_images(image_path, font_path, output_dir, date_to_use,
     original_width, original_height = template_img.size
 
     # ถ้า OUTPUT_WIDTH หรือ OUTPUT_HEIGHT เป็น None → ใช้ขนาดเดิม
-    # 💡 [แก้ไข] ตรวจสอบว่า template_data["output_width"] เป็น None หรือไม่
+    # ตรวจสอบว่า template_data["output_width"] เป็น None หรือไม่
     width_setting = template_data.get("output_width") # (ดึงมาจาก template_data)
     height_setting = template_data.get("output_height") # (ดึงมาจาก template_data)
 
@@ -285,17 +252,16 @@ def generate_single_lotto_images(image_path, font_path, output_dir, date_to_use,
     # (ย้าย original_width, original_height มาไว้ที่นี่)
     original_width, original_height = template_img.size
 
-
     # ปรับอัตราส่วน scaling
     scale_x = width / original_width
     scale_y = height / original_height
     
-    # 💡 [แก้ไข] เปลี่ยน ANTIALIAS เป็น LANCZOS
+    # เปลี่ยน ANTIALIAS เป็น LANCZOS
     resample_filter = Image.Resampling.LANCZOS
     resized_img = template_img.resize((width, height), resample_filter)
 
     # ปรับพิกัดทั้งหมดตามขนาดใหม่
-    # 💡 [แก้ไข] ตรวจสอบว่า positions ไม่ใช่ None ก่อน
+    # ตรวจสอบว่า positions ไม่ใช่ None ก่อน
     if positions is None:
         positions = []
     scaled_positions = [(int(x*scale_x), int(y*scale_y), t) for x,y,t in positions]
@@ -310,7 +276,7 @@ def generate_single_lotto_images(image_path, font_path, output_dir, date_to_use,
             return ImageFont.load_default()
             
     # โหลดฟอนต์แต่ละขนาด
-    # 💡 [แก้ไข] ใช้ dict 'font_sizes' ที่เราดึงออกมา
+    # ใช้ dict 'font_sizes' ที่เราดึงออกมา
     font_title = load_font(font_path, font_sizes.get("TITLE", FONT_SIZE_CUSTOM_TITLE))
     font_closing = load_font(font_path, font_sizes.get("CLOSING", FONT_SIZE_CLOSING_TIME))
     font_date = load_font(font_path, font_sizes.get("DATE", FONT_SIZE_DATE))
@@ -378,7 +344,7 @@ def generate_single_lotto_images(image_path, font_path, output_dir, date_to_use,
         )
 
         top_used = bottom_used = three_used = 0
-        left_single_used = False # 💡 [เพิ่ม] ตัวแปรเพื่อเช็คว่าเลข 1 ตัวแรกใช้ไปหรือยัง
+        left_single_used = False # ตัวแปรเพื่อเช็คว่าเลข 1 ตัวแรกใช้ไปหรือยัง
 
         # วาดข้อความตามจุดพิกัด
         for idx, (x, y, type_or_digits) in enumerate(scaled_positions):
@@ -437,7 +403,7 @@ def generate_single_lotto_images(image_path, font_path, output_dir, date_to_use,
 
             # เลขตัวเดียว (เด่น/รอง)
             elif type_or_digits == 1:
-                # 💡 [แก้ไข] ใช้วิธีเช็คตัวแปร boolean แทน idx
+                # ใช้วิธีเช็คตัวแปร boolean แทน idx
                 if not left_single_used:
                     current_text = numbers["left_single"]
                     left_single_used = True
@@ -500,7 +466,7 @@ def generate_single_lotto_images(image_path, font_path, output_dir, date_to_use,
         if not os.path.exists(template_output_dir):
             os.makedirs(template_output_dir, exist_ok=True)
             
-        # 💡 [แก้ไข] แก้ไขชื่อไฟล์ให้ถูกต้องตามที่คุยกันไว้ (ไม่มีชื่อเทมเพลตซ้ำ)
+        # แก้ไขชื่อไฟล์ให้ถูกต้องตามที่คุยกันไว้ (ไม่มีชื่อเทมเพลตซ้ำ)
         output_filename = f"{safe_title}_ใบที่_{num_run}.jpg"
         
         # รวม Path โฟลเดอร์ย่อย กับ ชื่อไฟล์
@@ -516,7 +482,7 @@ def generate_single_lotto_images(image_path, font_path, output_dir, date_to_use,
         if preview_callback:
             preview_callback(output_file)
             
-        # 💡 [เพิ่ม] อัปเดต Progress Bar ทีละ 1 เมื่อสร้างเสร็จ 1 ใบ
+        # อัปเดต Progress Bar ทีละ 1 เมื่อสร้างเสร็จ 1 ใบ
         if progress_callback:
             progress_callback(increment=True)
 
@@ -579,7 +545,7 @@ class LottoGuideApp:
         )
         btn_select_all.pack(pady=(0,10))
 
-        # 💡 [แก้ไข] ลบการวนลูปเปล่าๆ ออก
+        # ลบการวนลูปเปล่าๆ ออก
         # for i, temp in enumerate(TEMPLATES):
         #     f = tk.Frame(thumb_frame, bg=THEME_COLOR, padx=15)
 
@@ -723,7 +689,7 @@ class LottoGuideApp:
         d = filedialog.askdirectory(title="เลือกโฟลเดอร์")
         if d: var.set(d)
 
-    # 💡 [ลบ] ฟังก์ชัน open_template_editor ออกจาก main.py
+    # ฟังก์ชัน open_template_editor ออกจาก main.py
     # def open_template_editor(self):
     #     ...
 

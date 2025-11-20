@@ -22,3 +22,7 @@ FONT_SIZES = {
 
 OUTPUT_WIDTH = None
 OUTPUT_HEIGHT = None
+
+LOTTO_LIST = [
+    "ลาวพัฒนา ปิดรับ 20.20 น."
+]
