@@ -26,15 +26,14 @@ for module in _template_modules:
             "font_sizes": module.FONT_SIZES,
             "output_height": module.OUTPUT_HEIGHT,
             "output_width": module.OUTPUT_WIDTH,
-            "order": getattr(module, "TEMPLATE_ORDER", 99)
+            "order": getattr(module, "TEMPLATE_ORDER", 99),
+            "lotto_list": getattr(module, "LOTTO_LIST", [])
         }
         TEMPLATES.append(template_config)
         
     except AttributeError as e:
         print(f"❌ WARNING: เกิดข้อผิดพลาดในการโหลด {module.__name__}: {e}")
             
-# 💡 เรียงลำดับ TEMPLATES (เหมือนเดิม)
 TEMPLATES.sort(key=lambda t: t['order'])
 
-# 💡 [แก้ไข] ลบ resource_path ออกจากไฟล์นี้
 __all__ = ["TEMPLATES"]
